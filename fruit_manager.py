@@ -4,6 +4,7 @@ import datetime
 
 DATA_DIR = "data"
 PRIX_PATH = os.path.join(DATA_DIR, "prix.json")
+ICONE_PATH = os.path.join(DATA_DIR, 'icone.json')
 INVENTAIRE_PATH = os.path.join(DATA_DIR, "inventaire.json")
 TRESORERIE_PATH = os.path.join(DATA_DIR, "tresorerie.txt")
 
@@ -38,7 +39,8 @@ def ouvrir_prix(path=PRIX_PATH):
             "mangues": 7,
             "ananas": 5,
             "noix de coco": 4,
-            "papayes": 3
+            "pastèques": 30,
+            "avocats": 50,
         }
         with open(path, 'w', encoding='utf-8') as fichier:
             json.dump(prix_defaut, fichier, ensure_ascii=False, indent=4)
@@ -54,12 +56,33 @@ def ouvrir_inventaire(path=INVENTAIRE_PATH):
             "mangues": 85,
             "ananas": 45,
             "noix de coco": 60,
-            "papayes": 30
+            "pastèques": 3,
+            "avocats": 6,
         }
         with open(path, 'w', encoding='utf-8') as fichier:
             json.dump(inventaire_defaut, fichier, ensure_ascii=False, indent=4)
     with open(path, 'r', encoding='utf-8') as fichier:
         return json.load(fichier)
+
+
+def ouvrir_icones(path=ICONE_PATH):
+    os.makedirs(DATA_DIR, exist_ok=True)
+    if not os.path.exists(path):
+        icone_defaut = {
+                "bananes": "🍌",
+                "mangues": "🥭",
+                "ananas": "🍍",
+                "noix de coco": "🥥",
+                "pastèques": "🍉",
+                "avocats": "🥑",
+            }
+        with open(path, 'w', encoding='utf-8') as fichier:
+            json.dump(icone_defaut, fichier, ensure_ascii=False, indent=4)
+            
+    with open(path, 'r', encoding='utf-8') as fichier:
+        icones = json.load(fichier)
+        
+    return icones
 
 
 def ecrire_inventaire(inventaire, path="data/inventaire.json"):
