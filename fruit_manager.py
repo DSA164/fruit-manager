@@ -175,7 +175,7 @@ if __name__ == "__main__":
     afficher_inventaire(inventaire)
 
     recolter(inventaire, "bananes", 10)
-    inventaire, tresorerie = vendre(inventaire, "bananes", 5, tresorerie, prix)
-
+    inventaire, tresorerie, message = vendre(inventaire, "bananes", 5, tresorerie, prix)
+    print(message)
     ecrire_inventaire(inventaire)
     ecrire_tresorerie(tresorerie)
