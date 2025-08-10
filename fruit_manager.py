@@ -14,9 +14,7 @@ TRESORERIE_PATH = os.path.join(DATA_DIR, "tresorerie.txt")
 url = "https://api.frankfurter.app/latest?from=USD&to=EUR"
 response = requests.get(url)
 data = response.json()
-
 taux_eur_usd = data["rates"]["EUR"]
-print(f"1 USD = {taux_eur_usd} EUR")
 
 
 def enregistrer_tresorerie_historique(tresorerie, fichier="data/tresorerie_history.json"):
@@ -168,6 +166,7 @@ def dollar_to_euro(tresorerie, taux_de_change = taux_eur_usd):
 
 
 if __name__ == "__main__":
+    print(f"1 USD = {taux_eur_usd} EUR")
     inventaire = ouvrir_inventaire()
     tresorerie = ouvrir_tresorerie()
     prix = ouvrir_prix()
