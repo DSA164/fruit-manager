@@ -1,12 +1,22 @@
 import json
 import os
 import datetime
+import requests
 
 DATA_DIR = "data"
 PRIX_PATH = os.path.join(DATA_DIR, "prix.json")
 ICONE_PATH = os.path.join(DATA_DIR, 'icone.json')
 INVENTAIRE_PATH = os.path.join(DATA_DIR, "inventaire.json")
 TRESORERIE_PATH = os.path.join(DATA_DIR, "tresorerie.txt")
+
+
+
+url = "https://api.frankfurter.app/latest?from=USD&to=EUR"
+response = requests.get(url)
+data = response.json()
+
+taux_eur_usd = data["rates"]["EUR"]
+print(f"1 USD = {taux_eur_usd} EUR")
 
 
 def enregistrer_tresorerie_historique(tresorerie, fichier="data/tresorerie_history.json"):
@@ -151,8 +161,8 @@ def valeur_stock(inventaire, prix):
         valeur[fruit] = quantite * prix_unitaire
     return valeur
 
-def dollar_to_euro(tresorerie):
-    taux_de_change = 0.86
+
+def dollar_to_euro(tresorerie, taux_de_change = taux_eur_usd):
     tresorerie_euro = tresorerie * taux_de_change
     return tresorerie_euro
 
