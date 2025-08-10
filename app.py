@@ -15,9 +15,10 @@ icones = ouvrir_icones()
 
 
 with st.sidebar:
+    st.radio("Devise", options=["$", "€"], key="devise", horizontal=True, label_visibility="hidden")
     st.header("🛒 Vendre des Fruits")
     fruit_vendre = st.selectbox("Choisir un fruit", list(inventaire.keys()))
-    quantite_vendre = st.number_input("Quantité a vendre", min_value=1, step=1)
+    quantite_vendre = st.number_input("Quantité a vendre", min_value=1, step=1, max_value=inventaire[fruit_vendre])
 
     if st.button("Vendre"):
         inventaire, tresorerie, message = vendre(inventaire, fruit_vendre, quantite_vendre, tresorerie, prix)
@@ -25,7 +26,7 @@ with st.sidebar:
 
     st.header("🌱 Récolter des Fruits")
     fruit_recolter = st.selectbox("Choisir un fruit à récolter", list(inventaire.keys()), key="recolte_individuelle")
-    quantite_recolter = st.number_input("Quantité à récolter", min_value=1, step=1, key="quantite_recolte")
+    quantite_recolter = st.number_input("Quantité à récolter", min_value=1, step=1, key="quantite_recolte", max_value=100)
 
     if st.button("Récolter"):
         inventaire, message = recolter(inventaire, fruit_recolter, quantite_recolter)
@@ -35,7 +36,7 @@ c1, _, c2 = st.columns([10,1,10])
 with c1:
 
     st.header("💰 Trésorerie",  divider = "grey")
-    st.metric(label="Montant disponible", value=f"{tresorerie:.2f} $")
+    st.metric(label="Montant disponible", value = f"{tresorerie:.2f} $" if st.session_state.devise == "$" else f"{dollar_to_euro(tresorerie):.2f} €")
     st.markdown("###")
 
     st.header("📈 Évolution de la trésorerie")
@@ -45,11 +46,13 @@ with c1:
         df = pd.DataFrame(historique).tail(20)  # Derniers 20 points
         df["timestamp"] = pd.to_datetime(df["timestamp"])
         df = df.sort_values("timestamp")
+        if st.session_state.devise == "€":
+            df["tresorerie"] = df["tresorerie"] * dollar_to_euro(1)
 
         fig, ax = plt.subplots()
         ax.plot(df["timestamp"], df["tresorerie"], marker="o")
         ax.set_xlabel("Date")
-        ax.set_ylabel("Trésorerie ($)")
+        ax.set_ylabel(f"Trésorerie ({st.session_state.devise})")
         ax.set_title("Évolution de la trésorerie")
         ax.xaxis.set_major_formatter(mdates.DateFormatter('%d/%m %H:%M'))
         fig.autofmt_xdate()
