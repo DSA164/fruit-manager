@@ -6,10 +6,46 @@ import os
 import json
 import datetime
 from typing import Dict, Any
+import math
 
 PLANTATIONS_PATH = "data/plantations.json"
 SUPERFICIE_PLANTATION_MIN = 500    #en m^2
 SUPERFICIE_PLANTATION_MAX = 25000    #en m^2
+DISTANCE_MINIMUM_KM = 2.0  # Distance minimale entre deux plantations (en km)
+
+
+def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """
+    Calcule la distance en kilomètres entre deux points géographiques en utilisant la formule de Haversine.
+    
+    Args:
+        lat1, lon1: Latitude et longitude du premier point (en degrés)
+        lat2, lon2: Latitude et longitude du second point (en degrés)
+    
+    Returns:
+        float: Distance en kilomètres
+    """
+    # Rayon de la Terre en kilomètres
+    R = 6371.0
+    
+    # Conversion des degrés en radians
+    lat1_rad = math.radians(lat1)
+    lon1_rad = math.radians(lon1)
+    lat2_rad = math.radians(lat2)
+    lon2_rad = math.radians(lon2)
+    
+    # Différences de coordonnées
+    dlat = lat2_rad - lat1_rad
+    dlon = lon2_rad - lon1_rad
+    
+    # Formule de Haversine
+    a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    
+    # Distance en kilomètres
+    distance = R * c
+    return distance
+
 
 def creer_plantation(lat: float = 40.8214, lon: float = 14.4265) -> Dict[str, Any]:
     """
@@ -28,6 +64,17 @@ def creer_plantation(lat: float = 40.8214, lon: float = 14.4265) -> Dict[str, An
             - 'fruits_plantés': dictionnaire des fruits choisis et leur superficie
             - 'date_creation': date et heure de création (ISO string)
     """
+    
+    # Vérifier la distance avec les plantations existantes
+    plantations_existantes = lire_plantations()
+    for plantation in plantations_existantes:
+        existing_lat = plantation["geoloc"]["lat"]
+        existing_lon = plantation["geoloc"]["lon"]
+        distance = haversine_distance(lat, lon, existing_lat, existing_lon)
+        if distance < DISTANCE_MINIMUM_KM:
+            message = f"Impossible de créer la plantation car une autre plantation existe à {distance:.2f} km (distance minimale requise : {DISTANCE_MINIMUM_KM} km)."
+            return {}, message
+        
     geoloc = definir_geolocalisation(lat=lat, lon=lon)
     climat = geoloc["climat"]
 
@@ -78,8 +125,8 @@ def creer_plantation(lat: float = 40.8214, lon: float = 14.4265) -> Dict[str, An
 
     with open(PLANTATIONS_PATH, "w", encoding="utf-8") as fichier:
         json.dump(plantations_existantes, fichier, ensure_ascii=False, indent=4)
-
-    return plantation
+        message = f"Nouvelle plantation crée aux coordonnées {lat}° N, {lon}° E"
+    return plantation, message
 
 
 
@@ -113,7 +160,8 @@ def lire_plantations():
 
 if __name__ == "__main__":
     creer_fruits()
-    plantation_test = creer_plantation() 
+    plantation_test, message = creer_plantation(20, 20)
+    print(message) 
     for key, value in plantation_test.items():
         print(key)
         print("-"*len(key))
