@@ -1,5 +1,5 @@
 from fruit_manager import ouvrir_inventaire
-from geolocalisation import definir_geolocalisation
+from geolocalisation import definir_geolocalisation, terre_ferme
 from fruit import lire_fruits, creer_fruits
 import random
 import os
@@ -64,6 +64,10 @@ def creer_plantation(lat: float = 40.8214, lon: float = 14.4265) -> Dict[str, An
             - 'fruits_plantés': dictionnaire des fruits choisis et leur superficie
             - 'date_creation': date et heure de création (ISO string)
     """
+    # Vérificarion qu'on est bien sur la terre ferme!
+    if not terre_ferme(lat, lon):
+        message = "Nous ne faisons pas d'élévage de crevettes et de moules! Veuillez choisir des coordonnées sur la terre ferme!"
+        return {}, message
     
     # Vérifier la distance avec les plantations existantes
     plantations_existantes = lire_plantations()
@@ -160,9 +164,29 @@ def lire_plantations():
 
 if __name__ == "__main__":
     creer_fruits()
-    plantation_test, message = creer_plantation(20, 20)
-    print(message) 
-    for key, value in plantation_test.items():
+    print(" -- Test1: plantation existante -- ")
+    print("=================================")
+    for i in range(2):
+        plantation_test1, message1 = creer_plantation(20, 20)
+    print(message1, end="\n\n") 
+    
+    print(" -- Test2: plantation sur l'eau -- ")
+    print("===================================")
+    plantation_test2, message2 = creer_plantation(0, -30)
+    print(message2, end="\n\n")
+    
+    print(" -- Test3: plantation sur terre ferme et terrain vierge -- ")
+    print("===========================================================")
+    coords_existantes = [(p["geoloc"]["lat"], p["geoloc"]["lon"]) for p in lire_plantations()]
+    while True:
+        lat3 = random.uniform(-85, 85)
+        lon3 = random.uniform(-180, 180)
+        if all(abs(lat3 - lat) > 1 and abs(lon3 - lon) > 1 for lat, lon in coords_existantes):
+            if terre_ferme(lat3, lon3):
+                break
+    plantation_test3, message3 = creer_plantation(lat3, lon3)
+    print(message3)
+    for key, value in plantation_test3.items():
         print(key)
         print("-"*len(key))
         print(value, "\n")
